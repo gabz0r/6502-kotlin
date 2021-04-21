@@ -128,7 +128,7 @@ data class Memory6502(
     fun dump(range: IntRange) {
         println("Memory dump ${range.first.toString(16)} - ${range.last.toString(16)}")
         for(i in range) {
-            if(i == 0 || i.rem(16) == 0) {
+            if(i == 0 || i.rem(16) == 0 || range.last - range.first < 16) {
 
                 var address = i.toString(16)
                 repeat((1 .. (4 - address.length)).count()) {
@@ -147,6 +147,33 @@ data class Memory6502(
         }
 
         println()
+    }
+
+    companion object MemoryMap {
+        val ZEROPAGE = IntRange(0x0000, 0x00FF)
+        val ZEROPAGE_STACK = IntRange(0x0100, 0x01FF)
+        val OS_BASIC_PTR_P2 = IntRange(0x0200, 0x02FF)
+        val OS_BASIC_PTR_P3 = IntRange(0x0300, 0x03FF)
+        val SCREEN = IntRange(0x0400, 0x07FF)
+        val BASIC_PRG = IntRange(0x0800, 0x9FFF)
+        val MLANG_P1 = IntRange(0xA000, 0xBFFF)
+        val MLANG_P2 = IntRange(0xC000, 0xCFFF)
+
+        val IV = IntRange(0xFFFA, 0xFFFF)
+    }
+
+    fun load(data: UByteArray, address: UShort) {
+        //content = data.copyOf(0x10000)
+        reset()
+        data.forEachIndexed { index, uByte ->
+            val targetMemoryAddress = index.toUInt() + address
+            content[targetMemoryAddress.toInt()] = uByte
+        }
+    }
+
+    fun setInitializationVector(iv: UShort) {
+        content[0xFFFC] = (iv.toUInt() and 0x00FFu).toUByte()
+        content[0xFFFD] = ((iv.toUInt() and 0xFF00u) shr 0x08).toUByte()
     }
 
     operator fun get(idx: Int) = content[idx]

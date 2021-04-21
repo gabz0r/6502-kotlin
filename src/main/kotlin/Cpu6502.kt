@@ -67,7 +67,9 @@ data class Cpu6502(
                 if(instruction == null) {
                     println("Execution finished or unknown operation!")
 
-                    MEM.dump(0 .. 255)
+                    MEM.dump(Memory6502.ZEROPAGE)
+                    MEM.dump(Memory6502.MLANG_P1)
+                    MEM.dump(Memory6502.IV)
                     exitProcess(0)
                 }
 
